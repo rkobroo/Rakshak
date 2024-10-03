@@ -3,26 +3,24 @@ const axios = require("axios");
 const path = require("path");
 const { getPrefix } = global.utils;
 const { commands, aliases } = global.GoatBot;
-const doNotDelete = "[ 🐐 |  V2 ]"; // changing this wont change the goatbot V2 of list cmd it is just a decoyy
 
 module.exports = {
   config: {
     name: "help",
-    version: "1.17",
-    author: "NTKhang", // original author Kshitiz 
+    version: "2.0",
+    author: "Itachiffx",
     countDown: 5,
     role: 0,
     shortDescription: {
-      en: "View command usage and list all commands directly",
+      en: "View command usage and list all available commands.",
     },
     longDescription: {
-      en: "View command usage and list all commands directly",
+      en: "Displays a list of commands categorized by type or shows detailed help for a specific command.",
     },
     category: "info",
     guide: {
-      en: "{pn} / help cmdName ",
+      en: "{pn} [command name] - Get detailed info about a specific command or list all commands.",
     },
-    priority: 1,
   },
 
   onStart: async function ({ message, args, event, threadsData, role }) {
@@ -30,104 +28,90 @@ module.exports = {
     const threadData = await threadsData.get(threadID);
     const prefix = getPrefix(threadID);
 
+    // Command to show all commands or detailed help for a specific command
     if (args.length === 0) {
       const categories = {};
-      let msg = "";
+      let msg = "🌟 **Command List** 🌟\n\n";
 
-      msg += `TO DO LIST 🌹💐`; // replace with your name 
-
+      // Categorize commands
       for (const [name, value] of commands) {
         if (value.config.role > 1 && role < value.config.role) continue;
 
         const category = value.config.category || "Uncategorized";
-        categories[category] = categories[category] || { commands: [] };
-        categories[category].commands.push(name);
+        if (!categories[category]) categories[category] = [];
+        categories[category].push(name);
       }
 
-      Object.keys(categories).forEach((category) => {
-        if (category !== "info") {
-          msg += `\n╭───────────\n│ 『  ${category.toUpperCase()}  』`;
-
-
-          const names = categories[category].commands.sort();
-          for (let i = 0; i < names.length; i += 3) {
-            const cmds = names.slice(i, i + 3).map((item) => `✰${item}`);
-            msg += `\n│ ${cmds.join(" ".repeat(Math.max(1, 10 - cmds.join("").length)))}`;
-          }
-
-          msg += `\n╰────────────`;
+      // Format each category and command list
+      for (const category in categories) {
+        msg += `\n📂 **${category.toUpperCase()}**\n`;
+        const names = categories[category].sort();
+        for (let i = 0; i < names.length; i += 3) {
+          const cmdRow = names.slice(i, i + 3).map(cmd => `• ${cmd}`).join("   ");
+          msg += `${cmdRow}\n`;
         }
-      });
+      }
 
+      // Display total commands and usage guide
       const totalCommands = commands.size;
-      msg += `\n𝗖𝘂𝗿𝗿𝗲𝗻𝘁𝗹𝘆, 𝘁𝗵𝗲 𝗯𝗼𝘁 𝗵𝗮𝘀 ${totalCommands} 𝗰𝗼𝗺𝗺𝗮𝗻𝗱𝘀 𝘁𝗵𝗮𝘁 𝗰𝗮𝗻 𝗯𝗲 𝘂𝘀𝗲𝗱\n`;
-      msg += `𝗧𝘆𝗽𝗲 ${prefix} 𝗵𝗲𝗹𝗽 𝗰𝗺𝗱𝗡𝗮𝗺𝗲 𝘁𝗼 𝘃𝗶𝗲𝘄 𝘁𝗵𝗲 𝗱𝗲𝘁𝗮𝗶𝗹𝘀 𝗼𝗳 𝘁𝗵𝗮𝘁 𝗰𝗼𝗺𝗺𝗮𝗻𝗱\n`
-      msg += `🐐 | ITACHI SENSEI 👾 🪽`; // its not decoy so change it if you want 
+      msg += `\n🌐 **Total Commands**: ${totalCommands}\n`;
+      msg += `💡 Use \`${prefix}help [command name]\` to see detailed info for a specific command.\n\n🌟 **ITACHI SENSEI BOT** 🌟`;
 
-      const helpListImages = [
-        "https://i.ibb.co/c2LBssg/image.gif", // add image link here
+      // Random image selection for better presentation
+      const helpImages = [
+        "https://i.ibb.co/c2LBssg/image.gif",
         "https://i.ibb.co/Rc8n1rd/image.jpg",
         "https://i.ibb.co/V2jNPGp/image.gif",
         "https://i.ibb.co/SJ6VhMY/image.gif",
         "https://i.ibb.co/fYtYCq3/image.gif",
         "https://i.ibb.co/c8s9YvH/image.gif"
-        // Add more image links as needed
       ];
-
-      const helpListImage = helpListImages[Math.floor(Math.random() * helpListImages.length)];
-
-      await message.reply({
-        body: msg,
-        attachment: await global.utils.getStreamFromURL(helpListImage),
-      });
+      const helpImage = helpImages[Math.floor(Math.random() * helpImages.length)];
+      
+      try {
+        await message.reply({
+          body: msg,
+          attachment: await global.utils.getStreamFromURL(helpImage)
+        });
+      } catch (err) {
+        // Fallback in case image fetching fails
+        await message.reply({
+          body: msg,
+          attachment: fs.createReadStream(path.resolve(__dirname, 'fallback.jpg')) // use a local fallback image
+        });
+      }
     } else {
+      // Detailed help for a specific command
       const commandName = args[0].toLowerCase();
       const command = commands.get(commandName) || commands.get(aliases.get(commandName));
 
       if (!command) {
-        await message.reply(`Command "${commandName}" not found.`);
+        await message.reply(`❌ Command "${commandName}" not found.`);
       } else {
-        const configCommand = command.config;
-        const roleText = roleTextToString(configCommand.role);
-        const author = configCommand.author || "Unknown";
+        const { name, aliases, version, role, countDown, author, longDescription, guide } = command.config;
+        const roleText = getRoleText(role);
+        const aliasList = aliases ? aliases.join(", ") : "None";
+        const description = longDescription?.en || "No description available.";
+        const usage = guide?.en.replace(/{p}/g, prefix).replace(/{n}/g, name) || "No usage available.";
 
-        const longDescription = configCommand.longDescription ? configCommand.longDescription.en || "No description" : "No description";
+        const detailedHelp = `📝 **Command**: ${name}\n🔄 **Aliases**: ${aliasList}\n⚙ **Version**: ${version}\n📋 **Role**: ${roleText}\n⏱ **Cooldown**: ${countDown}s\n👤 **Author**: ${author}\n\n📖 **Description**: ${description}\n📚 **Usage**: ${usage}`;
 
-        const guideBody = configCommand.guide?.en || "No guide available.";
-        const usage = guideBody.replace(/{p}/g, prefix).replace(/{n}/g, configCommand.name);
-
-        const response = `╭── NAME ────⭓
-  │ ${configCommand.name}
-  ├── INFO
-  │ Description: ${longDescription}
-  │ Other names: ${configCommand.aliases ? configCommand.aliases.join(", ") : "Do not have"}
-  │ Other names in your group: Do not have
-  │ Version: ${configCommand.version || "1.0"}
-  │ Role: ${roleText}
-  │ Time per command: ${configCommand.countDown || 1}s
-  │ Author: ${author}
-  ├── Usage
-  │ ${usage}
-  ├── Notes
-  │ The content inside <XXXXX> can be changed
-  │ The content inside [a|b|c] is a or b or c
-  ╰━━━━━━━❖`;
-
-        await message.reply(response);
+        await message.reply(detailedHelp);
       }
     }
   },
 };
 
-function roleTextToString(roleText) {
-  switch (roleText) {
+// Helper function to convert role number to string
+function getRoleText(role) {
+  switch (role) {
     case 0:
-      return "0 (All users)";
+      return "0 (Everyone)";
     case 1:
-      return "1 (Group administrators)";
+      return "1 (Group Admin)";
     case 2:
-      return "2 (Admin bot)";
+      return "2 (Bot Admin)";
     default:
-      return "Unknown role";
+      return "Unknown";
   }
 }

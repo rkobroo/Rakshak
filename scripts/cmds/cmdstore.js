@@ -3,6 +3,7 @@ const axios = require("axios");
 module.exports = {
   config: {
     name: 'cmdstore',
+    aliases: ['cs'],
     version: '1.0',
     author: 'Vex_Kshitiz',
     role: 0,
@@ -42,10 +43,10 @@ module.exports = {
       let replyMessage = "";
       paginatedCommands.forEach(cmd => {
         replyMessage += `
-        ð—œð——:${cmd.id}
-        ð—–ð— ð——:${cmd.cmdName}
-        ð—–ð—¢ð——ð—˜:${cmd.codeLink}
-        ð—œð—¡ð—™ð—¢:${cmd.description}
+        𝗜𝗗:${cmd.id}
+        𝗖𝗠𝗗:${cmd.cmdName}
+        𝗖𝗢𝗗𝗘:${cmd.codeLink}
+        𝗜𝗡𝗙𝗢:${cmd.description}
       ----------------------------------------------`;
       });
 
@@ -84,10 +85,10 @@ module.exports = {
     const selectedCommand = commands.find(cmd => cmd.id === commandID);
 
     let replyMessage = `
-    ð—œð——:${selectedCommand.id}
-    ð—–ð— ð——:${selectedCommand.cmdName}
-    ð—–ð—¢ð——ð—˜:${selectedCommand.codeLink}
-    ð—œð—¡ð—™ð—¢:${selectedCommand.description}`;
+    𝗜𝗗:${selectedCommand.id}
+    𝗖𝗠𝗗:${selectedCommand.cmdName}
+    𝗖𝗢𝗗𝗘:${selectedCommand.codeLink}
+    𝗜𝗡𝗙𝗢:${selectedCommand.description}`;
 
     message.reply(replyMessage);
     global.GoatBot.onReply.delete(event.messageID);

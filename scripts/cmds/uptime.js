@@ -4,8 +4,8 @@ const path = require("path");
 
 module.exports = {
   config: {
-    name: "uptimeMonitor",
-    aliases: ["uptime", "monitor", "upm"],
+    name: "uptime",
+    aliases: ["u" ,"up" ,"upt"],
     version: "1.0",
     author: "OtinXSandip & Vex_kshitiz",
     role: 0,
